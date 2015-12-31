@@ -1,4 +1,5 @@
 import assert from 'power-assert';
+import sinon from 'sinon';
 import rewire from '../../lib/babel-rewire-wrapper';
 import { modules, mocks } from './mock-modules';
 
@@ -83,6 +84,11 @@ describe('Unit: babel-rewire wrapper', () => {
   });
 
   describe('#run()', () => {
+    function spyRewirer(rewirer) {
+      rewirer.injectMocks = sinon.spy();
+      rewirer.resetDependencies = sinon.spy();
+      return rewirer;
+    }
 
     context('as sync', () => {
       it('run synchronously if a given action takes no callback', () => {
@@ -92,8 +98,18 @@ describe('Unit: babel-rewire wrapper', () => {
         });
       });
 
-      it('injects mocks before running automatically');
-      it('resets dependencies after running automatically');
+      it('injects mocks before running automatically', () => {
+        const rewirer = spyRewirer(rewire());
+        rewirer.run(() => {
+          assert(rewirer.injectMocks.calledOnce);
+        });
+      });
+
+      it('resets dependencies after running automatically', () => {
+        const rewirer = spyRewirer(rewire());
+        rewirer.run(() => {});
+        assert(rewirer.resetDependencies.calledOnce);
+      });
 
       context('when any error occured while running', () => {
         it('resets dependencies');
@@ -108,17 +124,30 @@ describe('Unit: babel-rewire wrapper', () => {
             assert(modules.foo.__Rewire__.called);
             reset();
           })
-          .then(done);
+          .then(done, done);
       });
 
-      it('injects mocks before running automatically');
-      it('resets dependencies after running automatically');
+      it('injects mocks before running automatically', done => {
+        const rewirer = spyRewirer(rewire());
+        rewirer.run(reset => {
+          assert(rewirer.injectMocks.calledOnce);
+          reset();
+        }).then(done, done);
+      });
+
+      it('resets dependencies after running automatically', done => {
+        const rewirer = spyRewirer(rewire());
+        rewirer.run(reset => {
+          setTimeout(() => reset(), 0);
+          assert(! rewirer.resetDependencies.called);
+        })
+        .then(() => assert(rewirer.resetDependencies.calledOnce))
+        .then(done, done);
+      });
 
       context('when any error occured while running', () => {
         it('resets dependencies');
       });
     });
-
   });
-
 });
