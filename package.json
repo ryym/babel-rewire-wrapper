@@ -17,8 +17,10 @@
   },
   "scripts": {
     "build": "babel src --out-dir lib --source-maps inline",
-    "watch": "babel src -o lib --source-maps inline --watch",
-    "test": "mocha test/**/*-test.js"
+    "watch": "babel src --out-dir lib --source-maps inline --watch",
+    "pretest": "npm run build",
+    "test": "mocha test/**/*-test.js",
+    "test:watch": "npm run test -- --watch"
   },
   "keywords": [
     "babel-plugin-rewire",
