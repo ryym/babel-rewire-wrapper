@@ -1,6 +1,6 @@
 
 /**
- * Do actual injection to test modules.
+ * Do actual rewiring to test modules.
  */
 describe('Integration: babel-rewire wrapper', () => {
 

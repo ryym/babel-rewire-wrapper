@@ -30,7 +30,7 @@ describe('Unit: babel-rewire wrapper', () => {
       );
     });
 
-    it('does not inject actually unless a execution method is called', () => {
+    it('does not rewire actually unless a execution method is called', () => {
       const rewirer = rewire();
       rewirer.use(modules.foo, mocks.foo);
       assert(! modules.foo.__Rewire__.called);
@@ -38,7 +38,7 @@ describe('Unit: babel-rewire wrapper', () => {
   });
 
   describe('#remove()', () => {
-    it('removes a specified module from injection target list', () => {
+    it('removes a specified module from rewiring target list', () => {
       const rewirer = rewire()
         .use(modules.foo, mocks.foo)
         .use(modules.bar, mocks.bar);
@@ -58,12 +58,12 @@ describe('Unit: babel-rewire wrapper', () => {
     it('does nothing if unregistered module is given');
   });
 
-  describe('#injectMocks()', () => {
+  describe('#rewire()', () => {
     it('throws an error if a module has not babel-rewire methods');
 
     it('injects mocks to all modules via babel-rewire', () => {
       const rewirer = rewire().use(modules.foo, mocks.foo);
-      rewirer.injectMocks();
+      rewirer.rewire();
 
       assert.equal(
         modules.foo.__Rewire__.callCount,
@@ -85,7 +85,7 @@ describe('Unit: babel-rewire wrapper', () => {
 
   describe('#run()', () => {
     function spyRewirer(rewirer) {
-      rewirer.injectMocks = sinon.spy();
+      rewirer.rewire = sinon.spy();
       rewirer.resetDependencies = sinon.spy();
       return rewirer;
     }
@@ -101,7 +101,7 @@ describe('Unit: babel-rewire wrapper', () => {
       it('injects mocks before running automatically', () => {
         const rewirer = spyRewirer(rewire());
         rewirer.run(() => {
-          assert(rewirer.injectMocks.calledOnce);
+          assert(rewirer.rewire.calledOnce);
         });
       });
 
@@ -130,7 +130,7 @@ describe('Unit: babel-rewire wrapper', () => {
       it('injects mocks before running automatically', done => {
         const rewirer = spyRewirer(rewire());
         rewirer.run(reset => {
-          assert(rewirer.injectMocks.calledOnce);
+          assert(rewirer.rewire.calledOnce);
           reset();
         }).then(done, done);
       });

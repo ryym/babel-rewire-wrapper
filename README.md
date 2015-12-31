@@ -100,7 +100,7 @@ context('with mocha test', () => {
     const logger = createMockLogger();
     rewirer = rewire()
       .use(reader, { fs, logger })
-      .injectMocks();
+      .rewire();
   });
 
   after(() => {

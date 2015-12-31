@@ -12,7 +12,7 @@ class Rewirer {
   }
 
   /**
-   * Register a specified module as an injection target.
+   * Register a specified module as an rewiring target.
    *
    * @param {!*} module - A module to be injected mocks.
    *     The module must have both `__Rewire__` and
@@ -28,7 +28,7 @@ class Rewirer {
   }
 
   /**
-   * Remove a specified module from injection targets.
+   * Remove a specified module from rewiring targets.
    * If the given module doesn't be registered, does nothing.
    *
    * @param {*} module - A module to be removed from targets.
@@ -42,9 +42,9 @@ class Rewirer {
   }
 
   /**
-   * Inject all mocks to the registered modules.
+   * Rewire all dependencies by mocks on the registered modules.
    */
-  injectMocks() {
+  rewire() {
     this._eachMocks((module, name, mock) => {
       module.__Rewire__(name, mock);
     });
@@ -79,13 +79,13 @@ class Rewirer {
   }
 
   _runWithMocks(action) {
-    this.injectMocks();
+    this.rewire();
     action();
     this.resetDependencies();
   }
 
   _runWithMocksAsync(action) {
-    this.injectMocks();
+    this.rewire();
     return new Promise((resolve, reject) => {
       action(err => {
         this.resetDependencies();
