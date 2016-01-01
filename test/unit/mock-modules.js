@@ -5,10 +5,9 @@ import sinon from 'sinon';
  * using sinon.js.
  */
 function spiedRewire(obj) {
-  return Object.assign({}, obj, {
-    __Rewire__: sinon.spy(),
-    __ResetDependency__: sinon.spy()
-  });
+  obj.__Rewire__ = sinon.spy();
+  obj.__ResetDependency__ = sinon.spy();
+  return obj;
 }
 
 /**

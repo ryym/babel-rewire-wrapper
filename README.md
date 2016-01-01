@@ -1,5 +1,7 @@
 # Wrapper of [babel-plugin-rewire][babel-plugin-rewire]
 
+[![Build Status](https://travis-ci.org/ryym/babel-rewire-wrapper.svg?branch=master)](https://travis-ci.org/ryym/babel-rewire-wrapper.vim)
+
 This is a wrapper to use [babel-plugin-rewire][babel-plugin-rewire] more easily.
 
 [babel-plugin-rewire]: https://github.com/speedskater/babel-plugin-rewire
