@@ -1,12 +1,12 @@
 # Wrapper of [babel-plugin-rewire][babel-plugin-rewire]
 
-A wrapper to use [babel-plugin-rewire][babel-plugin-rewire] more easily.
+This is a wrapper to use [babel-plugin-rewire][babel-plugin-rewire] more easily.
 
 [babel-plugin-rewire]: https://github.com/speedskater/babel-plugin-rewire
 
 ## Example
 
-### Module
+To rewire the dependencies of this sample module..
 
 ```javascript
 import fs from 'fs';
@@ -20,9 +20,7 @@ export default {
 }
 ```
 
-### Test Code
-
-#### Use babel-plugin-rewire directly
+### Use babel-plugin-rewire directly
 
 ```javascript
 import reader from 'reader';
@@ -34,13 +32,13 @@ reader.__Rewire__('logger', {
   log: () => {}
 });
 
-assert.equal(reader.readFile(name), `Content of ${name}`);
+assert.equal(reader.readFile(name), `Content of ${name}.`);
 
 reader.__ResetDependency__('fs');
 reader.__ResetDependency__('logger');
 ```
 
-#### Use the wrapper
+### Use the wrapper
 
 ```javascript
 import reader from 'reader';
@@ -60,7 +58,7 @@ rewire()
   });
 ```
 
-#### Run async function
+### Run async function
 
 ```javascript
 import reader from 'reader';
@@ -75,18 +73,19 @@ rewire()
       log: () => {}
     }
   })
-  .run(done => {
+  .run(reset => {
     fetchFileName()
       .then(name => {
         assert.equal(reader.readFile(name), `Content of ${name}.`)
       })
-      .then(done);
-  });
+      .then(reset);
+  })
+  .then(...);
 ```
 
-### Call each method explicitly
+### Call rewiring methods separately
 
-You can inject and reset dependencies explicitly.
+You can inject mocks and reset dependencies explicitly.
 Following is an example used with [mocha](https://mochajs.org/).
 
 ```javascript
@@ -98,16 +97,15 @@ context('with mocha test', () => {
   before(() => {
     const fs = createMockFs();
     const logger = createMockLogger();
-    rewirer = rewire()
-      .use(reader, { fs, logger })
-      .injectMocks();
+    rewirer = rewire().use(reader, { fs, logger });
+    rewirer.rewire();
   });
 
   after(() => {
     rewirer.resetDependencies();
   });
 
-  it('can use mocks', () => {
+  it('can inject mocks', () => {
     assert.equal(reader.readFile('some.file'), 'Expected value');
   });
 });
