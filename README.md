@@ -1,6 +1,8 @@
 # Wrapper of [babel-plugin-rewire][babel-plugin-rewire]
 
 [![Build Status](https://travis-ci.org/ryym/babel-rewire-wrapper.svg?branch=master)](https://travis-ci.org/ryym/babel-rewire-wrapper.vim)
+[![Dependency Status](https://david-dm.org/ryym/babel-rewire-wrapper.svg)](https://david-dm.org/ryym/babel-rewire-wrapper)
+[![devDependency Status](https://david-dm.org/ryym/babel-rewire-wrapper/dev-status.svg)](https://david-dm.org/ryym/babel-rewire-wrapper#info=devDependencies)
 
 This is a wrapper to use [babel-plugin-rewire][babel-plugin-rewire] more easily.
 
