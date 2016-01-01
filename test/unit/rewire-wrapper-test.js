@@ -199,8 +199,31 @@ describe('Unit: babel-rewire wrapper', () => {
         .then(done, done);
       });
 
-      context('when any error occured while running', () => {
-        it('resets dependencies');
+      context('when reset() callback recieves something', () => {
+        it('assumes an error is occured', done => {
+          let rejected = false;
+          const rewirer = spyRewirer(rewire());
+          rewirer.run(reset => {
+            setTimeout(() => reset('error!'), 0);
+          })
+          .catch(err => {
+            rejected = true;
+            assert.equal(err, 'error!');
+          })
+          .then(() => assert(rejected))
+          .then(done, done);
+        });
+
+        it('resets dependencies', done => {
+          const rewirer = spyRewirer(rewire());
+          rewirer.run(reset => {
+            setTimeout(() => reset('error!'), 0);
+          })
+          .catch(err => {
+            assert(rewirer.resetDependencies.calledOnce);
+          })
+          .then(done, done);
+        });
       });
     });
   });
