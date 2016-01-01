@@ -21,6 +21,12 @@ class Rewirer {
    * @return {Rewirer} this instance
    */
   use(module, mocks) {
+    if (arguments.length !== 2) {
+      throw new Error('Please specify module and mocks');
+    }
+    if (! this._isRewirable(module)) {
+      throw new Error('A module must have __Rewire__ and __ResetDependency__ methods');
+    }
     this._targets.push({
       module, mocks
     });
@@ -76,6 +82,12 @@ class Rewirer {
     else {
       return this._runWithMocksAsync(action);
     }
+  }
+
+  _isRewirable(module) {
+    return module !== null
+      && module['__Rewire__']
+      && module['__ResetDependency__'];
   }
 
   _runWithMocks(action) {

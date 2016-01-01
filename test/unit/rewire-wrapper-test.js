@@ -10,7 +10,27 @@ describe('Unit: babel-rewire wrapper', () => {
   });
 
   describe('#use()', () => {
-    it('throws an error for invalid arguments');
+    it('throws an error for invalid arguments', () => {
+      const rewirer = rewire();
+      assert.throws(() => rewirer.use());
+      assert.throws(() => rewirer.use(modules.foo));
+      assert.throws(() => rewirer.use(1, 2, 3));
+    });
+
+    it('throws an error if a module has not babel-rewire methods', () => {
+      const rewirer = rewire();
+      assert.throws(() => rewirer.use(
+        {}, { a: 1 }
+      ));
+      assert.throws(() => rewirer.use(
+        { __Rewire__() {} },
+        { a: 1 }
+      ));
+      assert.throws(() => rewirer.use(
+        { __ResetDependency__() {} },
+        { a: 1 }
+      ));
+    });
 
     it('registers a module and mocks to be injected', () => {
       const rewirer = rewire();
@@ -55,12 +75,30 @@ describe('Unit: babel-rewire wrapper', () => {
       );
     });
 
-    it('does nothing if unregistered module is given');
+    it('does nothing if unregistered module is given', () => {
+      const rewirer = rewire()
+        .use(modules.foo, mocks.foo)
+        .use(modules.bar, mocks.bar);
+
+      assert.equal(rewirer._targets.length, 2);
+
+      const newModule = { baz: true };
+      rewirer.remove(newModule);
+
+      assert.deepEqual(
+        rewirer._targets,
+        [{
+          module: modules.foo,
+          mocks: mocks.foo
+        }, {
+          module: modules.bar,
+          mocks: mocks.bar
+        }]
+      );
+    });
   });
 
   describe('#rewire()', () => {
-    it('throws an error if a module has not babel-rewire methods');
-
     it('injects mocks to all modules via babel-rewire', () => {
       const rewirer = rewire().use(modules.foo, mocks.foo);
       rewirer.rewire();
