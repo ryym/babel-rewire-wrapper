@@ -150,7 +150,23 @@ describe('Unit: babel-rewire wrapper', () => {
       });
 
       context('when any error occured while running', () => {
-        it('resets dependencies');
+        it('throws the error as is', () => {
+          const rewirer = spyRewirer(rewire());
+          assert.throws(() => {
+            rewirer.run(() => { throw new Error('test-error'); });
+          });
+        });
+
+        it('resets dependencies', () => {
+          const rewirer = spyRewirer(rewire());
+          try {
+            rewirer.run(() => { throw new Error('test-error'); });
+          } catch (e) {
+            // Does nothing.
+          } finally {
+            assert(rewirer.resetDependencies.calledOnce);
+          }
+        });
       });
     });
 

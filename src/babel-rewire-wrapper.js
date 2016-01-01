@@ -92,8 +92,11 @@ class Rewirer {
 
   _runWithMocks(action) {
     this.rewire();
-    action();
-    this.resetDependencies();
+    try {
+      action();
+    } finally {
+      this.resetDependencies();
+    }
   }
 
   _runWithMocksAsync(action) {
