@@ -114,6 +114,7 @@ describe('Unit: babel-rewire wrapper', () => {
     it('resets dependencies of all modules via babel-rewire', () => {
       const rewirer = rewire().use(modules.foo, mocks.foo);
       rewirer.resetDependencies();
+
       assert.equal(
         modules.foo.__ResetDependency__.callCount,
         Object.keys(mocks.foo).length
@@ -129,11 +130,10 @@ describe('Unit: babel-rewire wrapper', () => {
     }
 
     context('as sync', () => {
-      it('run synchronously if a given action takes no callback', () => {
+      it('run synchronously if a given action does not return Promise', () => {
         const rewirer = rewire().use(modules.foo, mocks.foo);
-        rewirer.run(() => {
-          assert(modules.foo.__Rewire__.called);
-        });
+        const result  = rewirer.run(() => {});
+        assert(result === undefined);
       });
 
       it('injects mocks before running automatically', () => {
@@ -154,7 +154,7 @@ describe('Unit: babel-rewire wrapper', () => {
           const rewirer = spyRewirer(rewire());
           assert.throws(() => {
             rewirer.run(() => { throw new Error('test-error'); });
-          });
+          }, /test-error/);
         });
 
         it('resets dependencies', () => {
@@ -171,44 +171,54 @@ describe('Unit: babel-rewire wrapper', () => {
     });
 
     context('as async', () => {
-      it('run asynchronously if a given action takes a callback', done => {
+      function toPromise(action) {
+        return new Promise(resolve => {
+          action();
+          resolve();
+        });
+      }
+
+      it('run asynchronously if a given action returns Promise', done => {
         const rewierer = rewire().use(modules.foo, mocks.foo);
         rewierer
-          .run(reset => {
-            assert(modules.foo.__Rewire__.called);
-            reset();
+          .run(() => {
+            return toPromise(() => {});
           })
           .then(done, done);
       });
 
       it('injects mocks before running automatically', done => {
         const rewirer = spyRewirer(rewire());
-        rewirer.run(reset => {
-          assert(rewirer.rewire.calledOnce);
-          reset();
+        rewirer.run(() => {
+          return toPromise(() => {
+            assert(rewirer.rewire.calledOnce);
+          });
         }).then(done, done);
       });
 
       it('resets dependencies after running automatically', done => {
         const rewirer = spyRewirer(rewire());
-        rewirer.run(reset => {
-          setTimeout(() => reset(), 0);
-          assert(! rewirer.resetDependencies.called);
+        rewirer.run(() => {
+          return toPromise(() => {
+            assert(! rewirer.resetDependencies.called);
+          });
         })
         .then(() => assert(rewirer.resetDependencies.calledOnce))
         .then(done, done);
       });
 
-      context('when reset() callback recieves something', () => {
-        it('assumes an error is occured', done => {
-          let rejected = false;
+      context('when any error occured while running', () => {
+        it('returns rejected Promise', done => {
+          let rejected  = false;
           const rewirer = spyRewirer(rewire());
-          rewirer.run(reset => {
-            setTimeout(() => reset('error!'), 0);
+          rewirer.run(() => {
+            return toPromise(() => {
+              throw new Error('test-error');
+            });
           })
           .catch(err => {
             rejected = true;
-            assert.equal(err, 'error!');
+            assert.equal(err.message, 'test-error');
           })
           .then(() => assert(rejected))
           .then(done, done);
@@ -216,8 +226,10 @@ describe('Unit: babel-rewire wrapper', () => {
 
         it('resets dependencies', done => {
           const rewirer = spyRewirer(rewire());
-          rewirer.run(reset => {
-            setTimeout(() => reset('error!'), 0);
+          rewirer.run(() => {
+            return toPromise(() => {
+              throw new Error('test-error');
+            })
           })
           .catch(err => {
             assert(rewirer.resetDependencies.calledOnce);
