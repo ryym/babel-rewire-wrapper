@@ -39,14 +39,25 @@ describe('Integration: babel-rewire wrapper', () => {
   });
 
   context('run with async function', () => {
+    function delay(action, ms = 0) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          try {
+            action();
+            resolve();
+          }
+          catch (e) { reject(e); }
+        }, ms);
+      });
+    }
+
     it('injects mocks when running the action', done => {
       assertGreet('Hello');
       rewire()
         .use(greeter, { greet: () => 'Hi' })
-        .run(reset => {
-          setTimeout(() => {
+        .run(() => {
+          return delay(() => {
             assertGreet('Hi');
-            reset();
           }, 5);
         })
         .then(done, done);
@@ -56,8 +67,8 @@ describe('Integration: babel-rewire wrapper', () => {
       assertGreet('Hello');
       rewire()
         .use(greeter, { greet: () => 'Hi' })
-        .run(reset => {
-          setTimeout(reset, 5);
+        .run(() => {
+          return delay(() => {}, 5);
         })
         .then(() => assertGreet('Hello'))
         .then(done, done);
@@ -120,12 +131,11 @@ describe('Examples of README', () => {
             log: () => {}
           }
         })
-        .run(reset => {
-          fetchFileName()
+        .run(() => {
+          return fetchFileName()
             .then(name => {
               assert.equal(reader.readFile(name), `Content of ${name}.`)
-            })
-            .then(reset);
+            });
         })
         .then(done, done);
     });

@@ -1,5 +1,9 @@
 # Wrapper of [babel-plugin-rewire][babel-plugin-rewire]
 
+[![Build Status](https://travis-ci.org/ryym/babel-rewire-wrapper.svg?branch=master)](https://travis-ci.org/ryym/babel-rewire-wrapper.vim)
+[![Dependency Status](https://david-dm.org/ryym/babel-rewire-wrapper.svg)](https://david-dm.org/ryym/babel-rewire-wrapper)
+[![devDependency Status](https://david-dm.org/ryym/babel-rewire-wrapper/dev-status.svg)](https://david-dm.org/ryym/babel-rewire-wrapper#info=devDependencies)
+
 This is a wrapper to use [babel-plugin-rewire][babel-plugin-rewire] more easily.
 
 [babel-plugin-rewire]: https://github.com/speedskater/babel-plugin-rewire
@@ -60,6 +64,9 @@ rewire()
 
 ### Run async function
 
+When running an async function, you have to return Promise
+so that the dependencies will be reset correctly after running.
+
 ```javascript
 import reader from 'reader';
 import rewire from 'babel-rewire-wrapper';
@@ -73,12 +80,11 @@ rewire()
       log: () => {}
     }
   })
-  .run(reset => {
-    fetchFileName()
+  .run(() => {
+    return fetchFileName()
       .then(name => {
         assert.equal(reader.readFile(name), `Content of ${name}.`)
-      })
-      .then(reset);
+      });
   })
   .then(...);
 ```
@@ -110,3 +116,7 @@ context('with mocha test', () => {
   });
 });
 ```
+
+## License
+
+MIT

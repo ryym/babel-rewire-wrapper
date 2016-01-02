@@ -1,3 +1,6 @@
+function isPromise(obj) {
+  return !! obj && typeof obj['then'] === 'function';
+}
 
 /**
  * Rewirer wraps the functionalities of
@@ -68,19 +71,27 @@ class Rewirer {
   /**
    * Run the action. Rewirer automatically injects mocks
    * before running and resets dependencies after running.
-   * If the action is async, please takes an argument in
-   * the action. The argument is a callback to notify Rewirer
-   * that the async action is done.
+   * If the action is async, please returns Promise
+   * so that Rewirer can reset dependencies correctly
+   * after the async process.
    *
    * @param {!Rewirer~action} action
    * @return {?Promise} Promise if the action is async.
    */
   run(action) {
-    if (action.length === 0) {
-      this._runWithMocks(action);
+    let isSync = true;
+    this.rewire();
+
+    try {
+      const promiseOrElse = action();
+      if (isPromise(promiseOrElse)) {
+        isSync = false;
+        return this._resetDependenciesAlways(promiseOrElse);
+      }
+      return promiseOrElse;
     }
-    else {
-      return this._runWithMocksAsync(action);
+    finally {
+      isSync && this.resetDependencies();
     }
   }
 
@@ -90,23 +101,17 @@ class Rewirer {
       && module['__ResetDependency__'];
   }
 
-  _runWithMocks(action) {
-    this.rewire();
-    try {
-      action();
-    } finally {
-      this.resetDependencies();
-    }
-  }
-
-  _runWithMocksAsync(action) {
-    this.rewire();
-    return new Promise((resolve, reject) => {
-      action(err => {
+  _resetDependenciesAlways(promise) {
+    return promise.then(
+      result => {
         this.resetDependencies();
-        err ? reject(err) : resolve();
-      });
-    });
+        return result;
+      },
+      error => {
+        this.resetDependencies();
+        throw error;
+      }
+    );
   }
 
   _eachMocks(iteratee) {
@@ -120,19 +125,10 @@ class Rewirer {
   /**
    * While this callback is running, it is guaranteed
    * that all the registered modules are rewired.
+   * If this returns Promise, Rewirer resets dependencies
+   * after the Promise is done.
    *
    * @callback Rewirer~action
-   * @param {?Rewirer~done} done - If the action takes this argument,
-   *     Rewirer recognizes the action is async. In this case,
-   *     You have to call this done callback at the end to reset all
-   *     dependencies.
-   */
-
-  /**
-   * This callback notifies Rewirer that the action is done.
-   *
-   * @callback Rewirer~done
-   * @param {?*} error - Something to indicate the action fails.
    */
 }
 
