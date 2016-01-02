@@ -62,6 +62,9 @@ rewire()
 
 ### Run async function
 
+When running an async function, you have to return Promise
+so that the dependencies will be reset correctly after running.
+
 ```javascript
 import reader from 'reader';
 import rewire from 'babel-rewire-wrapper';
@@ -75,12 +78,11 @@ rewire()
       log: () => {}
     }
   })
-  .run(reset => {
-    fetchFileName()
+  .run(() => {
+    return fetchFileName()
       .then(name => {
         assert.equal(reader.readFile(name), `Content of ${name}.`)
-      })
-      .then(reset);
+      });
   })
   .then(...);
 ```
