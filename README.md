@@ -44,6 +44,10 @@ reader.__ResetDependency__('logger');
 
 ### Use the wrapper
 
+When you pass a callback to `run()` method, `rewire()` injects mocks
+and run the callback. All dependencies will be reset automatically
+after the running.
+
 ```javascript
 import reader from 'reader';
 import rewire from 'babel-rewire-wrapper';
@@ -58,8 +62,11 @@ rewire()
     }
   })
   .run(() => {
+    // While running this callback, all dependencies are rewired.
     assert.equal(reader.readFile(name), `Content of ${name}.`)
   });
+
+  // After the running, all dependencies are reset.
 ```
 
 ### Run async function
@@ -91,7 +98,7 @@ rewire()
 
 ### Call rewiring methods separately
 
-You can inject mocks and reset dependencies explicitly.
+You can also inject mocks and reset dependencies explicitly.
 Following is an example used with [mocha](https://mochajs.org/).
 
 ```javascript
