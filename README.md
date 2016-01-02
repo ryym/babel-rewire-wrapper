@@ -116,3 +116,7 @@ context('with mocha test', () => {
   });
 });
 ```
+
+## License
+
+MIT
