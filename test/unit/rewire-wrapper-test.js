@@ -149,7 +149,7 @@ describe('Unit: babel-rewire wrapper', () => {
         assert(rewirer.resetDependencies.calledOnce);
       });
 
-      context('when any error occured while running', () => {
+      context('when any error occurred while running', () => {
         it('throws the error as is', () => {
           const rewirer = spyRewirer(rewire());
           assert.throws(() => {
@@ -207,7 +207,7 @@ describe('Unit: babel-rewire wrapper', () => {
         .then(done, done);
       });
 
-      context('when any error occured while running', () => {
+      context('when any error occurred while running', () => {
         it('returns rejected Promise', done => {
           let rejected  = false;
           const rewirer = spyRewirer(rewire());
