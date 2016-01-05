@@ -1,6 +1,6 @@
 # Wrapper of [babel-plugin-rewire][babel-plugin-rewire]
 
-[![Build Status](https://travis-ci.org/ryym/babel-rewire-wrapper.svg?branch=master)](https://travis-ci.org/ryym/babel-rewire-wrapper.vim)
+[![Build Status](https://travis-ci.org/ryym/babel-rewire-wrapper.svg?branch=master)](https://travis-ci.org/ryym/babel-rewire-wrapper)
 [![Dependency Status](https://david-dm.org/ryym/babel-rewire-wrapper.svg)](https://david-dm.org/ryym/babel-rewire-wrapper)
 [![devDependency Status](https://david-dm.org/ryym/babel-rewire-wrapper/dev-status.svg)](https://david-dm.org/ryym/babel-rewire-wrapper#info=devDependencies)
 
@@ -13,13 +13,15 @@ This is a wrapper to use [babel-plugin-rewire][babel-plugin-rewire] more easily.
 To rewire the dependencies of this sample module..
 
 ```javascript
+/* loggingReader.js */
+
 import fs from 'fs';
 import logger from './logger';
 
 export default {
-  readFile(path) {
-    logger.log(`Read ${path}`);
-    return fs.readFileSync(path);
+  readFile(filePath) {
+    logger.log(`Read ${filePath}`);
+    return fs.readFileSync(filePath);
   }
 }
 ```
@@ -27,16 +29,16 @@ export default {
 ### Use babel-plugin-rewire directly
 
 ```javascript
-import reader from 'reader';
+import reader from './loggingReader';
 
 reader.__Rewire__('fs', {
-  readFileSync: name => `Content of ${name}.`
+  readFileSync: filePath => `Content of ${filePath}.`
 });
 reader.__Rewire__('logger', {
   log: () => {}
 });
 
-assert.equal(reader.readFile(name), `Content of ${name}.`);
+assert.equal(reader.readFile(filePath), `Content of ${filePath}.`);
 
 reader.__ResetDependency__('fs');
 reader.__ResetDependency__('logger');
@@ -46,16 +48,16 @@ reader.__ResetDependency__('logger');
 
 When you pass a callback to `run()` method, `rewire()` injects mocks
 and run the callback. All dependencies will be reset automatically
-after the running.
+after the running (even if some error occurred).
 
 ```javascript
-import reader from 'reader';
+import reader from './loggingReader';
 import rewire from 'babel-rewire-wrapper';
 
 rewire()
   .use(reader, {
     fs: {
-      readFileSync: name => `Content of ${name}.`
+      readFileSync: filePath => `Content of ${filePath}.`
     },
     logger: {
       log: () => {}
@@ -63,34 +65,57 @@ rewire()
   })
   .run(() => {
     // While running this callback, all dependencies are rewired.
-    assert.equal(reader.readFile(name), `Content of ${name}.`)
+    assert.equal(reader.readFile(filePath), `Content of ${filePath}.`)
   });
 
   // After the running, all dependencies are reset.
 ```
 
-### Run async function
+#### Rewire several modules
+
+You can chain `use()` methods.
+
+```javascript
+rewire()
+  .use(reader, {
+    fs: {
+      readFileSync: filePath => `Content of ${filePath}.`
+    },
+    logger: {
+      log: () => {}
+    }
+  })
+  .use(greeter, {
+    greet: () => 'Hi'
+  })
+  .run(() => {
+    assert.equal(reader.readFile(filePath), `Content of ${filePath}.`);
+    assert.equal(greeter.greet(), 'Hi');
+  });
+```
+
+#### Run async function
 
 When running an async function, you have to return Promise
 so that the dependencies will be reset correctly after running.
 
 ```javascript
-import reader from 'reader';
+import reader from './loggingReader';
 import rewire from 'babel-rewire-wrapper';
 
 rewire()
   .use(reader, {
     fs: {
-      readFileSync: name => `Content of ${name}.`
+      readFileSync: filePath => `Content of ${filePath}.`
     },
     logger: {
       log: () => {}
     }
   })
   .run(() => {
-    return fetchFileName()
-      .then(name => {
-        assert.equal(reader.readFile(name), `Content of ${name}.`)
+    return fetchFilePath()
+      .then(filePath => {
+        assert.equal(reader.readFile(filePath), `Content of ${filePath}.`)
       });
   })
   .then(...);
