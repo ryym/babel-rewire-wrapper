@@ -13,13 +13,15 @@ This is a wrapper to use [babel-plugin-rewire][babel-plugin-rewire] more easily.
 To rewire the dependencies of this sample module..
 
 ```javascript
+/* loggingReader.js */
+
 import fs from 'fs';
 import logger from './logger';
 
 export default {
-  readFile(path) {
-    logger.log(`Read ${path}`);
-    return fs.readFileSync(path);
+  readFile(filePath) {
+    logger.log(`Read ${filePath}`);
+    return fs.readFileSync(filePath);
   }
 }
 ```
@@ -27,16 +29,16 @@ export default {
 ### Use babel-plugin-rewire directly
 
 ```javascript
-import reader from 'reader';
+import reader from './loggingReader';
 
 reader.__Rewire__('fs', {
-  readFileSync: name => `Content of ${name}.`
+  readFileSync: filePath => `Content of ${filePath}.`
 });
 reader.__Rewire__('logger', {
   log: () => {}
 });
 
-assert.equal(reader.readFile(name), `Content of ${name}.`);
+assert.equal(reader.readFile(filePath), `Content of ${filePath}.`);
 
 reader.__ResetDependency__('fs');
 reader.__ResetDependency__('logger');
@@ -49,13 +51,13 @@ and run the callback. All dependencies will be reset automatically
 after the running.
 
 ```javascript
-import reader from 'reader';
+import reader from './loggingReader';
 import rewire from 'babel-rewire-wrapper';
 
 rewire()
   .use(reader, {
     fs: {
-      readFileSync: name => `Content of ${name}.`
+      readFileSync: filePath => `Content of ${filePath}.`
     },
     logger: {
       log: () => {}
@@ -63,7 +65,7 @@ rewire()
   })
   .run(() => {
     // While running this callback, all dependencies are rewired.
-    assert.equal(reader.readFile(name), `Content of ${name}.`)
+    assert.equal(reader.readFile(filePath), `Content of ${filePath}.`)
   });
 
   // After the running, all dependencies are reset.
@@ -75,22 +77,22 @@ When running an async function, you have to return Promise
 so that the dependencies will be reset correctly after running.
 
 ```javascript
-import reader from 'reader';
+import reader from './loggingReader';
 import rewire from 'babel-rewire-wrapper';
 
 rewire()
   .use(reader, {
     fs: {
-      readFileSync: name => `Content of ${name}.`
+      readFileSync: filePath => `Content of ${filePath}.`
     },
     logger: {
       log: () => {}
     }
   })
   .run(() => {
-    return fetchFileName()
-      .then(name => {
-        assert.equal(reader.readFile(name), `Content of ${name}.`)
+    return fetchFilePath()
+      .then(filePath => {
+        assert.equal(reader.readFile(filePath), `Content of ${filePath}.`)
       });
   })
   .then(...);
