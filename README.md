@@ -48,7 +48,7 @@ reader.__ResetDependency__('logger');
 
 When you pass a callback to `run()` method, `rewire()` injects mocks
 and run the callback. All dependencies will be reset automatically
-after the running.
+after the running (even if some error occurred).
 
 ```javascript
 import reader from './loggingReader';
