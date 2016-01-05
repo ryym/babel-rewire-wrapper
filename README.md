@@ -71,7 +71,30 @@ rewire()
   // After the running, all dependencies are reset.
 ```
 
-### Run async function
+#### Rewire several modules
+
+You can chain `use()` methods.
+
+```javascript
+rewire()
+  .use(reader, {
+    fs: {
+      readFileSync: filePath => `Content of ${filePath}.`
+    },
+    logger: {
+      log: () => {}
+    }
+  })
+  .use(greeter, {
+    greet: () => 'Hi'
+  })
+  .run(() => {
+    assert.equal(reader.readFile(filePath), `Content of ${filePath}.`);
+    assert.equal(greeter.greet(), 'Hi');
+  });
+```
+
+#### Run async function
 
 When running an async function, you have to return Promise
 so that the dependencies will be reset correctly after running.

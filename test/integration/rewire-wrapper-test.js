@@ -118,6 +118,25 @@ describe('Examples of README', () => {
         });
     });
 
+    it('demonstrates a sample which rewires several modules', () => {
+      rewire()
+        .use(reader, {
+          fs: {
+            readFileSync: filePath => `Content of ${filePath}.`
+          },
+          logger: {
+            log: () => {}
+          }
+        })
+        .use(greeter, {
+          greet: () => 'Hi'
+        })
+        .run(() => {
+          assert.equal(reader.readFile(filePath), `Content of ${filePath}.`);
+          assert.equal(greeter.greet(), 'Hi');
+        });
+    });
+
     it('demonstrates a sample using the wrapper in async', done => {
       function fetchFilePath() {
         return Promise.resolve('test-file');
