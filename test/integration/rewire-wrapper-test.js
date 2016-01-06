@@ -78,7 +78,7 @@ describe('Integration: babel-rewire wrapper', () => {
 
 
 describe('Examples of README', () => {
-  const name = 'test-name';
+  const filePath = 'test/file/path';
 
   function assertMocksNotInjected() {
     assert(reader.getLogger().log == null);
@@ -86,13 +86,13 @@ describe('Examples of README', () => {
 
   it('demonstrates basic usage of babel-plugin-rewire', () => {
     reader.__Rewire__('fs', {
-      readFileSync: name => `Content of ${name}.`
+      readFileSync: filePath => `Content of ${filePath}.`
     });
     reader.__Rewire__('logger', {
       log: () => {}
     });
 
-    assert.equal(reader.readFile(name), `Content of ${name}.`);
+    assert.equal(reader.readFile(filePath), `Content of ${filePath}.`);
 
     reader.__ResetDependency__('fs');
     reader.__ResetDependency__('logger');
@@ -107,34 +107,53 @@ describe('Examples of README', () => {
       rewire()
         .use(reader, {
           fs: {
-            readFileSync: name => `Content of ${name}.`
+            readFileSync: filePath => `Content of ${filePath}.`
           },
           logger: {
             log: () => {}
           }
         })
         .run(() => {
-          assert.equal(reader.readFile(name), `Content of ${name}.`)
+          assert.equal(reader.readFile(filePath), `Content of ${filePath}.`)
+        });
+    });
+
+    it('demonstrates a sample which rewires several modules', () => {
+      rewire()
+        .use(reader, {
+          fs: {
+            readFileSync: filePath => `Content of ${filePath}.`
+          },
+          logger: {
+            log: () => {}
+          }
+        })
+        .use(greeter, {
+          greet: () => 'Hi'
+        })
+        .run(() => {
+          assert.equal(reader.readFile(filePath), `Content of ${filePath}.`);
+          assert.equal(greeter.greet(), 'Hi');
         });
     });
 
     it('demonstrates a sample using the wrapper in async', done => {
-      function fetchFileName() {
+      function fetchFilePath() {
         return Promise.resolve('test-file');
       }
       rewire()
         .use(reader, {
           fs: {
-            readFileSync: name => `Content of ${name}.`
+            readFileSync: filePath => `Content of ${filePath}.`
           },
           logger: {
             log: () => {}
           }
         })
         .run(() => {
-          return fetchFileName()
-            .then(name => {
-              assert.equal(reader.readFile(name), `Content of ${name}.`)
+          return fetchFilePath()
+            .then(filePath => {
+              assert.equal(reader.readFile(filePath), `Content of ${filePath}.`)
             });
         })
         .then(done, done);
@@ -165,7 +184,7 @@ describe('Examples of README', () => {
     });
 
     function createMockFs() {
-      return { readFileSync: name => 'Expected value' };
+      return { readFileSync: filePath => 'Expected value' };
     }
     function createMockLogger() {
       return { log() {} }

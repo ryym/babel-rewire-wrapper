@@ -1,6 +1,6 @@
 {
   "name": "babel-rewire-wrapper",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Wrapper of babel-plugin-rewire.",
   "homepage": "https://github.com/ryym/babel-rewire-wrapper",
   "repository": {

@@ -100,24 +100,40 @@ describe('Unit: babel-rewire wrapper', () => {
 
   describe('#rewire()', () => {
     it('injects mocks to all modules via babel-rewire', () => {
-      const rewirer = rewire().use(modules.foo, mocks.foo);
+      const rewirer = rewire()
+        .use(modules.foo, mocks.foo)
+        .use(modules.bar, mocks.bar);
       rewirer.rewire();
 
-      assert.equal(
-        modules.foo.__Rewire__.callCount,
-        Object.keys(mocks.foo).length
+      assert.deepEqual(
+        [
+          modules.foo.__Rewire__.callCount,
+          modules.bar.__Rewire__.callCount,
+        ],
+        [
+          Object.keys(mocks.foo).length,
+          Object.keys(mocks.bar).length
+        ]
       );
     });
   });
 
   describe('#resetDependencies()', () => {
     it('resets dependencies of all modules via babel-rewire', () => {
-      const rewirer = rewire().use(modules.foo, mocks.foo);
+      const rewirer = rewire()
+        .use(modules.foo, mocks.foo)
+        .use(modules.bar, mocks.bar);
       rewirer.resetDependencies();
 
-      assert.equal(
-        modules.foo.__ResetDependency__.callCount,
-        Object.keys(mocks.foo).length
+      assert.deepEqual(
+        [
+          modules.foo.__ResetDependency__.callCount,
+          modules.bar.__ResetDependency__.callCount
+        ],
+        [
+          Object.keys(mocks.foo).length,
+          Object.keys(mocks.bar).length
+        ]
       );
     });
   });
@@ -149,7 +165,7 @@ describe('Unit: babel-rewire wrapper', () => {
         assert(rewirer.resetDependencies.calledOnce);
       });
 
-      context('when any error occured while running', () => {
+      context('when any error occurred while running', () => {
         it('throws the error as is', () => {
           const rewirer = spyRewirer(rewire());
           assert.throws(() => {
@@ -207,7 +223,7 @@ describe('Unit: babel-rewire wrapper', () => {
         .then(done, done);
       });
 
-      context('when any error occured while running', () => {
+      context('when any error occurred while running', () => {
         it('returns rejected Promise', done => {
           let rejected  = false;
           const rewirer = spyRewirer(rewire());
