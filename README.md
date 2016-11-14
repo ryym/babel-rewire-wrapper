@@ -8,9 +8,9 @@ This is a wrapper to use [babel-plugin-rewire][babel-plugin-rewire] more easily.
 
 [babel-plugin-rewire]: https://github.com/speedskater/babel-plugin-rewire
 
-## Example
+## Usage
 
-To rewire the dependencies of this sample module..
+For example, let's rewire the dependencies of this sample module.
 
 ```javascript
 /* loggingReader.js */
@@ -26,7 +26,7 @@ export default {
 }
 ```
 
-### Use babel-plugin-rewire directly
+### Without babel-rewire-wrapper
 
 ```javascript
 import reader from './loggingReader';
@@ -44,11 +44,7 @@ reader.__ResetDependency__('fs');
 reader.__ResetDependency__('logger');
 ```
 
-### Use the wrapper
-
-When you pass a callback to `run()` method, `rewire()` injects mocks
-and run the callback. All dependencies will be reset automatically
-after the running (even if some error occurred).
+### With babel-rewire-wrapper
 
 ```javascript
 import reader from './loggingReader';
@@ -70,6 +66,9 @@ rewire()
 
   // After the running, all dependencies are reset.
 ```
+
+When you pass a callback to `run()` method, `rewire()` injects mocks and run the callback.
+All dependencies will be reset automatically after the running (even if some error occurred).
 
 #### Rewire several modules
 
@@ -148,7 +147,3 @@ context('with mocha test', () => {
   });
 });
 ```
-
-## License
-
-MIT
