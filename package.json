@@ -39,6 +39,9 @@
     "power-assert": "^1.2.0",
     "sinon": "^1.17.2"
   },
+  "engines": {
+    "node": ">= 4.0.0"
+  },
   "babel": {
     "presets": [
       "es2015"
