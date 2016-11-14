@@ -20,7 +20,10 @@
     "watch": "babel src --out-dir lib --source-maps inline --watch",
     "pretest": "npm run build",
     "test": "mocha test/**/*-test.js",
-    "test:watch": "npm run test -- --watch"
+    "test:watch": "npm run test -- --watch",
+    "jsdoc": "jsdoc src/",
+    "preghpages": "npm run jsdoc",
+    "ghpages": "node script/ghpages.js"
   },
   "keywords": [
     "babel-plugin-rewire",
@@ -34,6 +37,8 @@
     "babel-plugin-rewire": "^1.0.0-beta-3",
     "babel-preset-es2015": "^6.3.13",
     "espower-babel": "^4.0.1",
+    "gh-pages": "^0.8.0",
+    "jsdoc": "^3.4.0",
     "mocha": "^2.3.4",
     "power-assert": "^1.2.0",
     "sinon": "^1.17.2"
